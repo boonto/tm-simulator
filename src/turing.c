@@ -35,10 +35,10 @@ void turing_step(turing *self) {
     self->num_steps++;
 
     while (i--) {
-        if(((*table)[0] == self->state) && ((*table)[3] == self->currentPosition->val)) {
-            self->state = (*table)[6];
-            self->currentPosition->val = (*table)[9];
-            turing_move(self, (*table)[12]);
+        if(((*table)[0] == self->state) && ((*table)[2] == self->currentPosition->val)) {
+            self->state = (*table)[4];
+            self->currentPosition->val = (*table)[6];
+            turing_move(self, (*table)[8]);
             break;
         }
         table++;
@@ -47,12 +47,28 @@ void turing_step(turing *self) {
 
 turing *turing_new(char **table, int num_entries) {
     turing * tm = malloc(sizeof(turing));
+    tm->state = **table;
     tm->tape = dl_list_new();
-    tm->currentPosition = dl_node_new('#');
-    dl_list_rpush(tm->tape, tm->currentPosition);
-    tm->state = '0';
+    table++;
+    while (strlen(*table) > 0) {
+        dl_node* node;
+        if (**table == '^') {
+            if (strlen(*table) <= 1) {
+                node = dl_node_new('#');
+            } else {
+                (*table)++;
+                node = dl_node_new(**table);
+            }
+            tm->currentPosition = node;
+        } else {
+            node = dl_node_new(**table);
+        }
+        dl_list_rpush(tm->tape, node);
+        (*table)++;
+    }
+    table++;
     tm->table = table;
-    tm->num_entries = num_entries;
+    tm->num_entries = num_entries - 2;
     tm->num_steps = 0;
     return tm;
 }
